@@ -1,7 +1,18 @@
-from rest_framework import routers
-from .api import UserViewSet
+from django.urls import path
+from users.api import (
+    register_user,
+    users,
+    user,
+    update_user,
+    delete_user,
+)
 
-router = routers.DefaultRouter()
-router.register('api/users', UserViewSet, 'users')
+app_name = "users"
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('register/', register_user, name="register"),
+    path('', users, name="users"),
+    path('<str:pk>/', user, name="user"),
+    path('update/<str:pk>/', update_user, name="update"),
+    path('delete/<str:pk>/', delete_user, name="delete"),
+]
