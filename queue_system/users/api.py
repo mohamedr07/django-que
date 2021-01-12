@@ -3,6 +3,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import UserSerializer
+from processes.models import Process_User
+from processes.serializers import ProcessUserSerializer
+from queues.models import User_Queue
+from queues.serializers import UserQueueSerializer
 
 
 @api_view(['GET',])
@@ -17,7 +21,14 @@ def user(request, pk):
     if request.method == 'GET':
         user = User.objects.get(id = pk)
         serializer = UserSerializer(user, many = False)
-        return Response(serializer.data)
+        processesSerializer=ProcessUserSerializer(Process_User.objects.filter(user=pk),many=True)
+        processesList=[p['process'] for p in processesSerializer.data]
+        processes={'processes':processesList}
+        queuesSerializer = UserQueueSerializer(User_Queue.objects.filter(user=pk),many=True)
+        queuesList=[q['queue'] for q in queuesSerializer.data]
+        queues={'queues':queuesList}
+        data={**serializer.data,**processes,**queues}
+        return Response({'user':data})
 
 @api_view(['POST',])
 def register_user(request):

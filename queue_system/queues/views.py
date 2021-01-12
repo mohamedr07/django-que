@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Queue
-from .serializers import QueueSerializer
+from .serializers import QueueSerializer,CreateQueueSerializer
 
 # Create your views here.
 
@@ -15,7 +15,7 @@ def queues_list(request):
         return Response(serializer.data,status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
-        serializer = QueueSerializer(data=request.data)
+        serializer = CreateQueueSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status.HTTP_201_CREATED)
@@ -29,7 +29,7 @@ def queue(request,pk):
         return Response(serializer.data,status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         queue = Queue.objects.get(id=pk)
-        serializer = QueueSerializer(data=request.data)
+        serializer = CreateQueueSerializer(data=request.data)
         if serializer.is_valid():
             queue.name=request.data['name']
             queue.estimated_time=request.data['estimated_time']

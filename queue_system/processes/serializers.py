@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from processes.models import Process
+from processes.models import Process,Process_User
 from queues.serializers import QueueSerializer
 
 class ProcessSerializer(serializers.ModelSerializer):
@@ -10,4 +10,14 @@ class ProcessSerializer(serializers.ModelSerializer):
 class CreateProcessSerializer(serializers.ModelSerializer):
     class Meta:
         model=Process
+        fields='__all__'
+
+
+class ProcessUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Process_User
+        fields=['process']
+class CreateProcessUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Process_User
         fields='__all__'
