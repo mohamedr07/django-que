@@ -2,6 +2,7 @@ from users.models import User
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import status
 from .serializers import UserSerializer
 from processes.models import Process_User
 from processes.serializers import ProcessUserSerializer
@@ -63,6 +64,12 @@ def register_user(request):
             data = serializer.errors
         return Response(data)
 
+@api_view(['GET'])
+def list_providers(request):
+    if request.method == 'GET':
+        users = User.objects.filter(is_staff=True)
+        serializer = UserSerializer(users, many = True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
 

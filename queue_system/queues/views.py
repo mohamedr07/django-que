@@ -48,6 +48,17 @@ def join_next_queue(request):
     if request.method == 'POST':
         next_queue = User_Queue.objects.filter(user=request.data['user']).first().queue
         queue=Queue.objects.get(id=next_queue.id)
-        if queue.users.add(request.data['user']):
-            return Response({'msg':'user joined queue successfully'},status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        queue.users.add(request.data['user'])
+        return Response({'msg':'user joined queue successfully'},status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+def advance_queue(request,pk):
+    if request.method == 'PUT':
+        queue = Queue.objects.get(id=pk)
+        serializer = QueueSerializer(queue)
+        users=serializer.data['users']
+        selected_user = users.pop(0)
+        queue.users.set(users)
+        queue.save()
+        User_Queue.objects.filter(user=selected_user,queue=pk).delete()
+        return Response({'user':selected_user},status=status.HTTP_200_OK)
