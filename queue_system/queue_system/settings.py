@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'users',
     'processes',
     'queues',
+    'servicestations',
     'rest_framework',
 ]
 

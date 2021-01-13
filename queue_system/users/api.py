@@ -16,7 +16,7 @@ def users(request):
         serializer = UserSerializer(users, many = True)
         return Response(serializer.data)
 
-@api_view(['GET',])
+@api_view(['GET','PUT','DELETE'])
 def user(request, pk):
     if request.method == 'GET':
         user = User.objects.get(id = pk)
@@ -29,6 +29,23 @@ def user(request, pk):
         queues={'queues':queuesList}
         data={**serializer.data,**processes,**queues}
         return Response({'user':data})
+    elif request.method == 'PUT':
+        user = User.objects.get(id = pk)
+        serializer = UserSerializer(instance = user, data = request.data, partial = True)
+        data = {}
+        if serializer.is_valid():
+            user = serializer.save()
+            data['response'] = "successfully updated a new user."
+            data['id'] = user.id
+            data['full_name'] = user.full_name
+            data['email'] = user.email
+        else:
+            data = serializer.errors
+        return Response(data)
+    elif request.method == 'DELETE':
+        user = User.objects.get(id = pk)
+        user.delete()
+        return Response('User deleted successfully')
 
 @api_view(['POST',])
 def register_user(request):
@@ -46,35 +63,6 @@ def register_user(request):
             data = serializer.errors
         return Response(data)
 
-@api_view(['PUT',])
-def update_user(request, pk):
-
-    if request.method == 'PUT':
-        user = User.objects.get(id = pk)
-        serializer = UserSerializer(instance = user, data = request.data, partial = True)
-        data = {}
-        if serializer.is_valid():
-            user = serializer.save()
-            data['response'] = "successfully updated a new user."
-            data['id'] = user.id
-            data['full_name'] = user.full_name
-            data['email'] = user.email
-        else:
-            data = serializer.errors
-        return Response(data)
 
 
-@api_view(['DELETE',])
-def delete_user(request, pk):
 
-    if request.method == 'DELETE':
-        user = User.objects.get(id = pk)
-        user.delete()
-        return Response('User deleted successfully')
-
-# class UserViewSet(viewsets.ModelViewSet):
-#     queryset = User.objects.all()
-#     permission_classes = [
-#         permissions.AllowAny
-#     ]
-#     serializer_class = UserSerializer
