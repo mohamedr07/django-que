@@ -4,6 +4,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Queue
 from .serializers import QueueSerializer,CreateQueueSerializer
+from .models import User_Queue
+
 
 # Create your views here.
 
@@ -40,3 +42,12 @@ def queue(request,pk):
         queue = Queue.objects.get(id=pk)
         queue.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
+
+@api_view(['POST'])
+def join_next_queue(request):
+    if request.method == 'POST':
+        next_queue = User_Queue.objects.filter(user=request.data['user']).first().queue
+        queue=Queue.objects.get(id=next_queue.id)
+        if queue.users.add(request.data['user']):
+            return Response({'msg':'user joined queue successfully'},status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

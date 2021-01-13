@@ -6,9 +6,10 @@
 # urlpatterns = router.urls
 
 from django.urls import path
-from .views import queues_list,queue
+from .views import queues_list,queue,join_next_queue
 
 urlpatterns = [
     path('',queues_list),
-    path('<int:pk>',queue)
+    path('<int:pk>',queue),
+    path('join',join_next_queue)
 ]
