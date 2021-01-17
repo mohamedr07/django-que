@@ -6,10 +6,13 @@ name = "pypi"
 [packages]
 django = "*"
 djangorestframework = "*"
-psycopg2 = "*"
+django-cors-headers = "*"
+djangorestframework-simplejwt = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 pylint = "*"
+bandit = "*"
 
 [requires]
 python_version = "3.9"

@@ -1,16 +1,20 @@
 from users.models import User 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from .serializers import UserSerializer
 from processes.models import Process_User
 from processes.serializers import ProcessUserSerializer
 from queues.models import User_Queue
 from queues.serializers import UserQueueSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @api_view(['GET',])
+@permission_classes([AllowAny])
 def users(request):
     if request.method == 'GET':
         users = User.objects.all()
@@ -49,20 +53,27 @@ def user(request, pk):
         return Response('User deleted successfully')
 
 @api_view(['POST',])
+@permission_classes([AllowAny])
 def register_user(request):
-
     if request.method == 'POST':
         serializer = UserSerializer(data = request.data)
-        data = {}
         if serializer.is_valid():
             user = serializer.reg_user()
-            data['response'] = "successfully registered a new user."
-            data['id'] = user.id
-            data['full_name'] = user.full_name
-            data['email'] = user.email
+            return Response("Registered successfully", status=status.HTTP_201_CREATED)
         else:
-            data = serializer.errors
-        return Response(data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST',])
+@permission_classes([AllowAny])
+def blacklistToken(request):
+    if request.method == 'POST':
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response("Successfully logged out")
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def list_providers(request):
@@ -70,6 +81,4 @@ def list_providers(request):
         users = User.objects.filter(is_staff=True)
         serializer = UserSerializer(users, many = True)
         return Response(serializer.data,status=status.HTTP_200_OK)
-
-
 

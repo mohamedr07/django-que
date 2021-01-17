@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\eee\\.virtualenvs\\django-que-EO0mtxEE\\Scripts\\python.exe"
+    "python.linting.pylintEnabled": false,
+    "python.linting.banditEnabled": true,
+    "python.linting.enabled": false
 }
