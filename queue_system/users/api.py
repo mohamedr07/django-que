@@ -17,7 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 @permission_classes([AllowAny])
 def users(request):
     if request.method == 'GET':
-        users = User.objects.all()
+        users = User.objects.all().order_by('id')
         serializer = UserSerializer(users, many = True)
         return Response(serializer.data)
 
