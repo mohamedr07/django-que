@@ -61,9 +61,9 @@ def advance_queue(request,pk):
         User_Queue.objects.filter(user=selected_user,queue=pk).delete()
         return Response({'user':selected_user},status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+@api_view(['GET'])
 def get_user_info(request,pk):
-    if request.method =='POST':
+    if request.method =='GET':
         queue = Queue.objects.get(id=pk)
         serializer = QueueSerializer(queue)
         users=serializer.data['users']
