@@ -12,7 +12,7 @@ from .models import User_Queue
 @api_view(['GET','POST'])
 def queues_list(request):
     if request.method == 'GET':
-        queues = Queue.objects.all()
+        queues = Queue.objects.all().order_by('id')
         serializer = QueueSerializer(queues,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
@@ -31,11 +31,9 @@ def queue(request,pk):
         return Response(serializer.data,status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         queue = Queue.objects.get(id=pk)
-        serializer = CreateQueueSerializer(data=request.data)
+        serializer = CreateQueueSerializer(instance=queue,data=request.data,partial=True)
         if serializer.is_valid():
-            queue.name=request.data['name']
-            queue.estimated_time=request.data['estimated_time']
-            queue.save()
+            serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
