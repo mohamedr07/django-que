@@ -11,4 +11,4 @@ class StationSerializer(serializers.ModelSerializer):
 class CreateStationSerializer(serializers.ModelSerializer):
     class Meta:
         model=ServiceStation
-        fields=['name']
+        fields='__all__'

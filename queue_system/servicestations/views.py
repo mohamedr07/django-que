@@ -10,7 +10,7 @@ from users.models import User
 @api_view(['GET','POST'])
 def stations_list(request):
     if request.method == 'GET':
-        stations = StationSerializer(ServiceStation.objects.all(),many=True)
+        stations = StationSerializer(ServiceStation.objects.all().order_by('id'),many=True)
         return Response(stations.data,status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = CreateStationSerializer(data=request.data)
@@ -25,12 +25,16 @@ def station(request,pk):
         return Response(station.data,status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         station = ServiceStation.objects.get(id=pk)
-        serializer = CreateStationSerializer(data=request.data)
-        provider = User.objects.get(id=request.data['provider'])
+        if 'provider' in request.data.keys():
+            try:
+                oldStation = ServiceStation.objects.get(provider_id=request.data['provider'])
+                oldStation.provider=None
+                oldStation.save()
+            except:
+                pass
+        serializer = CreateStationSerializer(instance=station,data=request.data,partial=True)
         if serializer.is_valid():
-            station.name=request.data['name']
-            station.provider=provider
-            station.save()
+            serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
