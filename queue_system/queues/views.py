@@ -1,19 +1,22 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import Queue
 from .serializers import QueueSerializer,CreateQueueSerializer
 from .models import User_Queue
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions
 
-
-# Create your views here.
+# Create your views here. 
 
 @api_view(['GET','POST'])
+@permission_classes([IsAdminUser])
 def queues_list(request):
     if request.method == 'GET':
-        queues = Queue.objects.all()
-        serializer = QueueSerializer(queues,many=True)
+        queue = Queue.objects.all()
+        serializer = QueueSerializer(queue,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
@@ -24,6 +27,7 @@ def queues_list(request):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','PUT','DELETE'])
+@permission_classes([IsAdminUser])
 def queue(request,pk):
     if request.method == 'GET':
         queue = Queue.objects.get(id=pk)
