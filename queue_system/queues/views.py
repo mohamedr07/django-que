@@ -15,8 +15,13 @@ from rest_framework.permissions import DjangoModelPermissions
 @permission_classes([IsAdminUser])
 def queues_list(request):
     if request.method == 'GET':
+<<<<<<< HEAD
         queue = Queue.objects.all()
         serializer = QueueSerializer(queue,many=True)
+=======
+        queues = Queue.objects.all().order_by('id')
+        serializer = QueueSerializer(queues,many=True)
+>>>>>>> 9e2d2aec2131bda33838815e202f7754700ef32d
         return Response(serializer.data,status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
@@ -35,11 +40,9 @@ def queue(request,pk):
         return Response(serializer.data,status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         queue = Queue.objects.get(id=pk)
-        serializer = CreateQueueSerializer(data=request.data)
+        serializer = CreateQueueSerializer(instance=queue,data=request.data,partial=True)
         if serializer.is_valid():
-            queue.name=request.data['name']
-            queue.estimated_time=request.data['estimated_time']
-            queue.save()
+            serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
@@ -53,7 +56,7 @@ def join_next_queue(request):
         next_queue = User_Queue.objects.filter(user=request.data['user']).first().queue
         queue=Queue.objects.get(id=next_queue.id)
         queue.users.add(request.data['user'])
-        return Response({'msg':'user joined queue successfully'},status=status.HTTP_200_OK)
+        return Response({'msg':'user joined queue successfully','queue':next_queue.id},status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
 def advance_queue(request,pk):
@@ -66,3 +69,14 @@ def advance_queue(request,pk):
         queue.save()
         User_Queue.objects.filter(user=selected_user,queue=pk).delete()
         return Response({'user':selected_user},status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_user_info(request,pk):
+    if request.method =='GET':
+        queue = Queue.objects.get(id=pk)
+        serializer = QueueSerializer(queue)
+        users=serializer.data['users']
+        position=users.index(request.data['user'])
+        estimated_time=(position+1)*queue.estimated_time
+        return Response({position,estimated_time},status=status.HTTP_200_OK)
+        

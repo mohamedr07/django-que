@@ -5,7 +5,6 @@ class Queue(models.Model):
     name=models.CharField(max_length=150)
     estimated_time=models.IntegerField()
     users=models.ManyToManyField(User)
-
     def __str__(self):
         return self.name
 

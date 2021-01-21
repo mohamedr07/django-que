@@ -14,7 +14,7 @@ from queues.serializers import UserQueueSerializer
 @api_view(['GET','POST'])
 def processes_list(request):
     if request.method == 'GET':
-        processes = Process.objects.all()
+        processes = Process.objects.all().order_by('id')
         serializer = ProcessSerializer(processes,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
@@ -33,11 +33,9 @@ def process(request,pk):
         return Response(serializer.data,status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         process = Process.objects.get(id=pk)
-        serializer = CreateProcessSerializer(data=request.data)
+        serializer = CreateProcessSerializer(instance=process,data=request.data,partial=True)
         if serializer.is_valid():
-            process.name=request.data['name']
-            process.queues.set(request.data['queues'])
-            process.save()
+            serializer.save()
             return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
@@ -53,6 +51,7 @@ def join_process(request,pk):
             return Response(status=status.HTTP_404_NOT_FOUND)
         processSerializer = ProcessSerializer(process)
         queuesList=[q['id'] for q in processSerializer.data['queues']]
+        print(queuesList)
         for queue in queuesList:
             data={'user':request.data['user'],'queue':queue}
             serializer = UserQueueSerializer(data=data)
