@@ -12,16 +12,11 @@ from rest_framework.permissions import DjangoModelPermissions
 # Create your views here. 
 
 @api_view(['GET','POST'])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def queues_list(request):
     if request.method == 'GET':
-<<<<<<< HEAD
-        queue = Queue.objects.all()
-        serializer = QueueSerializer(queue,many=True)
-=======
         queues = Queue.objects.all().order_by('id')
         serializer = QueueSerializer(queues,many=True)
->>>>>>> 9e2d2aec2131bda33838815e202f7754700ef32d
         return Response(serializer.data,status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
@@ -32,7 +27,7 @@ def queues_list(request):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','PUT','DELETE'])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def queue(request,pk):
     if request.method == 'GET':
         queue = Queue.objects.get(id=pk)
