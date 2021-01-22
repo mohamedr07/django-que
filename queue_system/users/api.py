@@ -21,6 +21,14 @@ def users(request):
         serializer = UserSerializer(users, many = True)
         return Response(serializer.data)
 
+@api_view(['GET',])
+@permission_classes([AllowAny])
+def search_users(request, inp):
+    if request.method == 'GET':
+        users = User.objects.filter(email__istartswith=inp).filter(is_staff=False).filter(is_superuser=False)[:5]
+        serializer = UserSerializer(users, many = True)
+        return Response(serializer.data)
+
 @api_view(['GET','PUT','DELETE'])
 def user(request, pk):
     if request.method == 'GET':

@@ -4,7 +4,8 @@ from users.api import (
     users,
     user,
     list_providers,
-    blacklistToken
+    blacklistToken,
+    search_users,
 )
 
 app_name = "users"
@@ -14,5 +15,6 @@ urlpatterns = [
     path('', users, name="users"),
     path('<int:pk>/', user, name="user"),
     path('providers',list_providers),
-    path('logout/blacklist/', blacklistToken, name="blacklist")
+    path('logout/blacklist/', blacklistToken, name="blacklist"),
+    path('addprovider/<str:inp>/', search_users, name="search")
 ]
