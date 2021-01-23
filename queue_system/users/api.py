@@ -86,7 +86,7 @@ def blacklistToken(request):
 @api_view(['GET'])
 def list_providers(request):
     if request.method == 'GET':
-        users = User.objects.filter(is_staff=True)
+        users = User.objects.filter(is_staff=True).filter(is_superuser=False)
         serializer = UserSerializer(users, many = True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 
