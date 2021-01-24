@@ -10,8 +10,9 @@ from queues.models import User_Queue
 from queues.serializers import UserQueueSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-
 
 @api_view(['GET',])
 @permission_classes([AllowAny])
@@ -30,35 +31,40 @@ def search_users(request, inp):
         return Response(serializer.data)
 
 @api_view(['GET','PUT','DELETE'])
+@permission_classes([IsAuthenticated])
 def user(request, pk):
-    if request.method == 'GET':
-        user = User.objects.get(id = pk)
-        serializer = UserSerializer(user, many = False)
-        processesSerializer=ProcessUserSerializer(Process_User.objects.filter(user=pk),many=True)
-        processesList=[p['process'] for p in processesSerializer.data]
-        processes={'processes':processesList}
-        queuesSerializer = UserQueueSerializer(User_Queue.objects.filter(user=pk),many=True)
-        queuesList=[q['queue'] for q in queuesSerializer.data]
-        queues={'queues':queuesList}
-        data={**serializer.data,**processes,**queues}
-        return Response({'user':data})
-    elif request.method == 'PUT':
-        user = User.objects.get(id = pk)
-        serializer = UserSerializer(instance = user, data = request.data, partial = True)
-        data = {}
-        if serializer.is_valid():
-            user = serializer.save()
-            data['response'] = "successfully updated a new user."
-            data['id'] = user.id
-            data['full_name'] = user.full_name
-            data['email'] = user.email
-        else:
-            data = serializer.errors
-        return Response(data)
-    elif request.method == 'DELETE':
-        user = User.objects.get(id = pk)
-        user.delete()
-        return Response('User deleted successfully')
+    if request.user.id == pk:
+        print(request.user.id)
+        if request.method == 'GET':
+            user = User.objects.get(id = pk)
+            serializer = UserSerializer(user, many = False)
+            processesSerializer=ProcessUserSerializer(Process_User.objects.filter(user=pk),many=True)
+            processesList=[p['process'] for p in processesSerializer.data]
+            processes={'processes':processesList}
+            queuesSerializer = UserQueueSerializer(User_Queue.objects.filter(user=pk),many=True)
+            queuesList=[q['queue'] for q in queuesSerializer.data]
+            queues={'queues':queuesList}
+            data={**serializer.data,**processes,**queues}
+            return Response({'user':data})
+        elif request.method == 'PUT':
+            user = User.objects.get(id = pk)
+            serializer = UserSerializer(instance = user, data = request.data, partial = True)
+            data = {}
+            if serializer.is_valid():
+                user = serializer.save()
+                data['response'] = "successfully updated a new user."
+                data['id'] = user.id
+                data['full_name'] = user.full_name
+                data['email'] = user.email
+            else:
+                data = serializer.errors
+            return Response(data)
+        elif request.method == 'DELETE':
+            user = User.objects.get(id = pk)
+            user.delete()
+            return Response('User deleted successfully')
+    else:
+        return Response('Access denied')
 
 @api_view(['POST',])
 @permission_classes([AllowAny])
