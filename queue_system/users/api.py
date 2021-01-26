@@ -10,31 +10,37 @@ from queues.models import User_Queue
 from queues.serializers import UserQueueSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAdminUser
-from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['GET',])
-@permission_classes([AllowAny])
+@permission_classes([IsAdminUser])
 def users(request):
-    if request.method == 'GET':
-        users = User.objects.all().order_by('id')
-        serializer = UserSerializer(users, many = True)
-        return Response(serializer.data)
+    if request.user.is_superuser == True:
+        if request.method == 'GET':
+            users = User.objects.all().order_by('id')
+            serializer = UserSerializer(users, many = True)
+            return Response(serializer.data)
+    else:
+        return Response('Access denied')
+    
 
 @api_view(['GET',])
-@permission_classes([AllowAny])
+@permission_classes([IsAdminUser])
 def search_users(request, inp):
-    if request.method == 'GET':
-        users = User.objects.filter(email__istartswith=inp).filter(is_staff=False).filter(is_superuser=False)[:5]
-        serializer = UserSerializer(users, many = True)
-        return Response(serializer.data)
+    if request.user.is_superuser == True :
+        if request.method == 'GET':
+            users = User.objects.filter(email__istartswith=inp).filter(is_staff=False).filter(is_superuser=False)[:5]
+            serializer = UserSerializer(users, many = True)
+            return Response(serializer.data)
+    else :
+        return Response('Access denied')
+    
 
 @api_view(['GET','PUT','DELETE'])
 @permission_classes([IsAuthenticated])
 def user(request, pk):
     if request.user.id == pk:
-        print(request.user.id)
         if request.method == 'GET':
             user = User.objects.get(id = pk)
             serializer = UserSerializer(user, many = False)
@@ -90,9 +96,30 @@ def blacklistToken(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([IsAdminUser])
 def list_providers(request):
-    if request.method == 'GET':
-        users = User.objects.filter(is_staff=True).filter(is_superuser=False)
-        serializer = UserSerializer(users, many = True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+    if request.user.is_superuser == True :
+        if request.method == 'GET':
+            users = User.objects.filter(is_staff=True).filter(is_superuser=False)
+            serializer = UserSerializer(users, many = True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+    else :
+        return Response('Access denied')
 
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def set_unset_provider(request, pk):
+    if request.user.is_superuser == True:
+        if request.method == 'PUT':
+            user = User.objects.get(id = pk) 
+            serializer = UserSerializer(instance = user, data = {'is_staff': not user.is_staff}, partial = True)
+            data = {}
+            if serializer.is_valid():
+                user = serializer.save()
+                data = "successfully setted as a provider"
+            else:
+                data = serializer.errors
+            return Response(data)
+    else:
+        return Response('Access denied')

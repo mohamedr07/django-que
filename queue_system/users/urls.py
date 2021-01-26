@@ -6,6 +6,7 @@ from users.api import (
     list_providers,
     blacklistToken,
     search_users,
+    set_unset_provider,
 )
 
 app_name = "users"
@@ -16,5 +17,6 @@ urlpatterns = [
     path('<int:pk>/', user, name="user"),
     path('providers',list_providers),
     path('logout/blacklist/', blacklistToken, name="blacklist"),
-    path('addprovider/<str:inp>/', search_users, name="search")
+    path('searchusers/<str:inp>/', search_users, name="search"),
+    path('setunsetprovider/<int:pk>/', set_unset_provider, name="setprovider")
 ]

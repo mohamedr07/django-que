@@ -13,6 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
         } 
     
     def reg_user(self):
+        if len(self.validated_data['full_name']) < 4 :
+            raise serializers.ValidationError({'Please enter a valid name'})
         user = User(
             email = self.validated_data['email'],
             full_name = self.validated_data['full_name']
