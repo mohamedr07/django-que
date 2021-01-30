@@ -13,5 +13,5 @@ urlpatterns = [
     path('<int:pk>',queue),
     path('join',join_next_queue),
     path('<int:pk>/advance',advance_queue),
-    path('<int:pk>/info',get_user_info)
+    path('<int:pk>/info',get_user_info),
 ]

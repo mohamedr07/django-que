@@ -68,7 +68,7 @@ def join_process(request,pk):
             booking = serializer.data['id']
             
             for queue in queuesList:
-                if User_Queue.objects.filter(user_id = request.data['user']).filter(queue_id = queue).exists():
+                if User_Queue.objects.filter(user_id = request.data['user']).filter(queue_id = queue).filter(booking = booking).exists():
                     pass
                 else:
                     data={'user':request.data['user'], 'queue':queue, 'booking':booking, 'joined_at':datetime.datetime.now()}

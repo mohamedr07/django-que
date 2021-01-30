@@ -61,38 +61,42 @@ def join_next_queue(request):
         return Response({'msg':'user joined queue successfully','queue':next_queue.id},status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
-@permission_classes([IsAdminUser])
+@permission_classes([AllowAny])
 def advance_queue(request,pk):
     if request.method == 'PUT':
         queue = Live_Queue.objects.filter(queue_id = pk).first()
-        uq = User_Queue.objects.filter(completed= False).filter(user = queue.user_id).filter(queue = queue.queue_id).first()
-        data = {
-            'completed': True,
-            'completed_at': datetime.datetime.now()
-        }
-        booking = uq.booking_id
-        serializer = UserQueueSerializer(instance=uq,data=data,partial=True)
-        if serializer.is_valid():
-            serializer.save()
-        data2 = User_Queue.objects.filter(completed= False).filter(user = queue.user_id).first()
-        if not User_Queue.objects.filter(booking = booking).filter(completed = False).exists():
-            processData = {
+        try:
+            uq = User_Queue.objects.filter(completed= False).filter(user = queue.user_id).filter(queue = queue.queue_id).first()
+            data = {
                 'completed': True,
                 'completed_at': datetime.datetime.now()
             }
-            process = Process_User.objects.get(id=booking)
-            serializer3 = CreateProcessUserSerializer(instance=process,data=processData,partial=True)
-            if serializer3.is_valid():
-                serializer3.save()
+            booking = uq.booking_id
+            serializer = UserQueueSerializer(instance=uq,data=data,partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            data2 = User_Queue.objects.filter(completed= False).filter(user = queue.user_id).first()
+            if not User_Queue.objects.filter(booking = booking).filter(completed = False).exists():
+                processData = {
+                    'completed': True,
+                    'completed_at': datetime.datetime.now()
+                }
+                process = Process_User.objects.get(id=booking)
+                serializer3 = CreateProcessUserSerializer(instance=process,data=processData,partial=True)
+                if serializer3.is_valid():
+                    serializer3.save()
+                else:
+                    pass
+            queue_id = queue.id
+            queue.delete()
+            serializer2 = LiveQueueSerializer(data = {'user': data2.user_id, 'queue': data2.queue_id})
+            if serializer2.is_valid():
+                serializer2.save()
             else:
                 pass
-        queue.delete()
-        serializer2 = LiveQueueSerializer(data = {'user': data2.user_id, 'queue': data2.queue_id})
-        if serializer2.is_valid():
-            serializer2.save()
-        else:
-            pass
-        return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+            return Response(queue_id,status=status.HTTP_202_ACCEPTED)
+        except:
+            return Response(queue_id,status=status.HTTP_202_ACCEPTED)
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         
 

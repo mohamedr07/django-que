@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import (
 from users.views import LoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('ws/', include('websocket.urls')),
     path('api/users/', include('users.urls')),
     path('api/queues/',include('queues.urls')),
     path('api/processes/',include('processes.urls')),
