@@ -6,8 +6,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from users.views import LoginView
+from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',TemplateView.as_view(template_name='index.html')),
     path('ws/', include('websocket.urls')),
     path('api/users/', include('users.urls')),
     path('api/queues/',include('queues.urls')),
